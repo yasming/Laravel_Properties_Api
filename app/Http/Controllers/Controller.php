@@ -9,5 +9,11 @@ use Illuminate\Routing\Controller as BaseController;
 
 class Controller extends BaseController
 {
+    const ZAP = 'zap';
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
+    public function apiResponse($key,$value)
+    {
+        return response()->json([$key => $value]);
+    }
 }
