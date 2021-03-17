@@ -9,7 +9,8 @@ use Illuminate\Routing\Controller as BaseController;
 
 class Controller extends BaseController
 {
-    const ZAP = 'zap';
+    const ZAP       = 'zap';
+    const VIVA_REAL = 'viva_real';
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
     public function apiResponse($key,$value)

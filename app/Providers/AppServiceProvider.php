@@ -25,7 +25,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->app->bind(PropertiesService::class, function () {
-            return (new PropertiesService)->setAllProperties()->setZapProperties();
+            return (new PropertiesService)->setAllProperties()
+                                          ->setZapProperties()
+                                          ->setVivaRealProperties();
         });
     }
 }

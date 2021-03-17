@@ -14,6 +14,7 @@ class PropertiesService
     private $urlToGetProperties;
     private $allProperties;
     private $zapProperties;
+    private $vivaRealProperties;
 
     public function __construct()
     {
@@ -37,9 +38,20 @@ class PropertiesService
         return $this;
     }
 
+    public function setVivaRealProperties()
+    {
+        if ($this->allProperties) {
+            $this->zapProperties =  $this->allProperties->filter(function ($item){
+                                        if(!isset($item['pricingInfos']['businessType'])) return false;
+                                        if($this->applyBusinessRules($item))              return $item;
+                                    });
+        }
+        return $this;
+    }
+
     public function getZapProperties()
     {
-        return $this->zapProperties;
+        return $this->zapProperties->values();
     }
 
     private function applyBusinessRules($item) : bool
