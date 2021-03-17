@@ -6,10 +6,14 @@ use Illuminate\Support\Facades\Http;
 
 class PropertiesService
 {
-    const RENTAL               = 'RENTAL';   
-    const SALE                 = 'SALE';   
-    const MIN_VALUE_ZAP_RENTAL = 3500;
-    const MIN_VALUE_ZAP_SALE   = 600000;
+    const RENTAL                     = 'RENTAL';   
+    const SALE                       = 'SALE';
+    const TYPE_ZAP                   = 1;
+    const TYPE_VIVA_REAL             = 2;   
+    const MIN_VALUE_ZAP_RENTAL       = 3500;
+    const MAX_VALUE_VIVA_REAL_RENTAL = 4000;
+    const MIN_VALUE_ZAP_SALE         = 600000;
+    const MAX_VALUE_VIVA_REAL_SALE   = 700000;
 
     private $urlToGetProperties;
     private $allProperties;
@@ -29,23 +33,11 @@ class PropertiesService
 
     public function setZapProperties()
     {
-        if ($this->allProperties) {
-            $this->zapProperties =  $this->allProperties->filter(function ($item){
-                                        if(!isset($item['pricingInfos']['businessType'])) return false;
-                                        if($this->applyBusinessRules($item))              return $item;
-                                    });
-        }
-        return $this;
-    }
-
-    public function setVivaRealProperties()
-    {
-        if ($this->allProperties) {
-            $this->zapProperties =  $this->allProperties->filter(function ($item){
-                                        if(!isset($item['pricingInfos']['businessType'])) return false;
-                                        if($this->applyBusinessRules($item))              return $item;
-                                    });
-        }
+        $this->zapProperties =  $this->allProperties->filter(function ($item){
+                                    if(!isset($item['pricingInfos']['businessType']))   return false;
+                                    if($this->applyBusinessRules($item,self::TYPE_ZAP)) return $item;
+                                });
+        
         return $this;
     }
 
@@ -54,23 +46,40 @@ class PropertiesService
         return $this->zapProperties->values();
     }
 
-    private function applyBusinessRules($item) : bool
+    public function setVivaRealProperties()
     {
-        if($item['pricingInfos']['businessType'] == self::RENTAL) return $this->applyRentalRule($item);
-        if($item['pricingInfos']['businessType'] == self::SALE)   return $this->applySaleRule($item);
+        $this->vivaRealProperties = $this->allProperties->filter(function ($item){
+                                        if(!isset($item['pricingInfos']['businessType']))          return false;
+                                        if($this->applyBusinessRules($item, self::TYPE_VIVA_REAL)) return $item;
+                                    });
+        
+        return $this;
     }
 
-    private function applyRentalRule($item) : bool
+    public function getVivaRealProperties()
     {
-        if(!isset($item['pricingInfos']['rentalTotalPrice']))                       return false;
-        if($item['pricingInfos']['rentalTotalPrice'] >= self::MIN_VALUE_ZAP_RENTAL) return true;
+        return $this->vivaRealProperties->values();
+    }
+
+    private function applyBusinessRules($item,$type) : bool
+    {
+        if($item['pricingInfos']['businessType'] == self::RENTAL) return $this->applyRentalRule($item,$type);
+        if($item['pricingInfos']['businessType'] == self::SALE)   return $this->applySalesRule($item,$type);
+    }
+
+    private function applyRentalRule($item,$type) : bool
+    {
+        if(!isset($item['pricingInfos']['rentalTotalPrice']))                                                              return false;
+        if($type == self::TYPE_ZAP       && $item['pricingInfos']['rentalTotalPrice'] >= self::MIN_VALUE_ZAP_RENTAL)       return true;
+        if($type == self::TYPE_VIVA_REAL && $item['pricingInfos']['rentalTotalPrice'] <= self::MAX_VALUE_VIVA_REAL_RENTAL) return true;
         return false; 
     }
 
-    private function applySaleRule($item) : bool
+    private function applySalesRule($item, $type) : bool
     {
-        if(!isset($item['pricingInfos']['price']))                     return false;
-        if($item['pricingInfos']['price'] >= self::MIN_VALUE_ZAP_SALE) return true;
+        if(!isset($item['pricingInfos']['price']))                                                            return false;
+        if($type == self::TYPE_ZAP       && $item['pricingInfos']['price'] >= self::MIN_VALUE_ZAP_SALE)       return true;
+        if($type == self::TYPE_VIVA_REAL && $item['pricingInfos']['price'] <= self::MAX_VALUE_VIVA_REAL_SALE) return true;
         return false; 
     }
 }

@@ -11,7 +11,10 @@ class PropertiesServiceTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $this->service = (new PropertiesService)->setAllProperties()->setZapProperties();
+        ini_set('memory_limit', '2G');
+        $this->service = (new PropertiesService)->setAllProperties()
+                                                ->setZapProperties()
+                                                ->setVivaRealProperties();
     }
 
     public function test_it_should_test_zap_rent_properties_rules()
@@ -42,6 +45,38 @@ class PropertiesServiceTest extends TestCase
                 $item['pricingInfos']['businessType'] == PropertiesService::SALE 
                     && 
                 $item['pricingInfos']['price'] < PropertiesService::MIN_VALUE_ZAP_SALE
+            ) return $item;
+        });
+    }
+
+    public function test_it_should_test_viva_real_rent_properties_rules()
+    {
+        $this->assertEquals($this->getVivaRealRentPropertiesNotInRule(), collect());
+    }
+
+    public function test_it_should_test_viva_real_sale_properties_rules()
+    {
+        $this->assertEquals($this->getVivaRealSalesPropertiesNotInRule(), collect());
+    }
+
+    private function getVivaRealRentPropertiesNotInRule()
+    {
+        return $this->service->getVivaRealProperties()->filter(function ($item) {
+            if( 
+                $item['pricingInfos']['businessType'] == PropertiesService::RENTAL 
+                    && 
+                $item['pricingInfos']['rentalTotalPrice'] > PropertiesService::MAX_VALUE_VIVA_REAL_RENTAL
+            ) return $item;
+        });
+    }
+
+    private function getVivaRealSalesPropertiesNotInRule()
+    {
+        return $this->service->getVivaRealProperties()->filter(function ($item) {
+            if( 
+                $item['pricingInfos']['businessType'] == PropertiesService::SALE 
+                    && 
+                $item['pricingInfos']['price'] > PropertiesService::MAX_VALUE_VIVA_REAL_SALE
             ) return $item;
         });
     }
