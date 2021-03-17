@@ -4,7 +4,7 @@ namespace App\Services\Properties;
 
 use Illuminate\Support\Facades\Http;
 
-class Properties
+class PropertiesService
 {
     const RENTAL               = 'RENTAL';   
     const SALE                 = 'SALE';   
@@ -50,14 +50,14 @@ class Properties
 
     private function applyRentalRule($item) : bool
     {
-        if(!isset($item['pricingInfos']['rentalTotalPrice']))                        return false;
+        if(!isset($item['pricingInfos']['rentalTotalPrice']))                       return false;
         if($item['pricingInfos']['rentalTotalPrice'] >= self::MIN_VALUE_ZAP_RENTAL) return true;
         return false; 
     }
 
     private function applySaleRule($item) : bool
     {
-        if(!isset($item['pricingInfos']['price']))                    return false;
+        if(!isset($item['pricingInfos']['price']))                     return false;
         if($item['pricingInfos']['price'] >= self::MIN_VALUE_ZAP_SALE) return true;
         return false; 
     }

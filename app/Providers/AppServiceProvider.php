@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Services\Properties\Properties;
+use App\Services\Properties\PropertiesService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,8 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->app->bind(Properties::class, function () {
-            return (new Properties)->setAllProperties()->setZapProperties();
+        $this->app->bind(PropertiesService::class, function () {
+            return (new PropertiesService)->setAllProperties()->setZapProperties();
         });
     }
 }
