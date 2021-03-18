@@ -17,6 +17,10 @@ class PropertiesServiceTest extends TestCase
                                                 ->setVivaRealProperties();
     }
 
+    /**
+     * zap
+     */
+
     public function test_it_should_test_zap_rent_properties_rules()
     {
         $this->assertEquals($this->getZapRentPropertiesNotInRule(), collect());
@@ -25,6 +29,30 @@ class PropertiesServiceTest extends TestCase
     public function test_it_should_test_zap_sale_properties_rules()
     {
         $this->assertEquals($this->getZapSalesPropertiesNotInRule(), collect());
+    }
+
+    private function getZapSalesPropertiesNotInRule()
+    {
+        return $this->service->getZapProperties()->filter(function ($item) {
+            if( 
+                $item['pricingInfos']['businessType'] == PropertiesService::SALE 
+                    && 
+                $this->zapPropertiesRules($item)
+            ) return $item;
+        });
+    }
+    
+    private function zapPropertiesRules($item)
+    {
+        $longitude            =  $item['address']['geoLocation']['location']['lon'];
+        $latitude             =  $item['address']['geoLocation']['location']['lat'];
+        $propertiesBetweenBox =  numberBetween(PropertiesService::MIN_LONGITUDE,$longitude,PropertiesService::MAX_LONGITUDE)
+                                    &&
+                                 numberBetween(PropertiesService::MIN_LATITUDE,$latitude,PropertiesService::MAX_LATITUDE);
+        if($propertiesBetweenBox) {
+            return $item['pricingInfos']['price'] < PropertiesService::MIN_VALUE_ZAP_SALE * PropertiesService::MULTIPLY_ZAP_FACTOR;
+        }
+        return $item['pricingInfos']['price'] < PropertiesService::MIN_VALUE_ZAP_SALE*PropertiesService::MULTIPLY_ZAP_FACTOR;
     }
 
     public function test_it_should_test_if_zap_properties_have_no_address()
@@ -43,16 +71,6 @@ class PropertiesServiceTest extends TestCase
         });
     }
 
-    private function getZapSalesPropertiesNotInRule()
-    {
-        return $this->service->getZapProperties()->filter(function ($item) {
-            if( 
-                $item['pricingInfos']['businessType'] == PropertiesService::SALE 
-                    && 
-                $item['pricingInfos']['price'] < PropertiesService::MIN_VALUE_ZAP_SALE
-            ) return $item;
-        });
-    }
 
     /**
      *  viva real
