@@ -9,6 +9,6 @@ class ZapController extends Controller
 {    
     public function __invoke(PropertiesService $properties)
     {
-        return $this->apiResponse(self::ZAP, $properties->getZapProperties());
+        return $this->apiResponse(self::ZAP, $properties->getZapProperties()->paginate(self::PAGINATION_NUMBER));
     }
 }
