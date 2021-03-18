@@ -33,10 +33,7 @@ class PropertiesService
 
     public function setZapProperties()
     {
-        $this->zapProperties =  $this->allProperties->filter(function ($item){
-                                    if(!isset($item['pricingInfos']['businessType']))   return false;
-                                    if($this->applyBusinessRules($item,self::TYPE_ZAP)) return $item;
-                                });
+        $this->zapProperties =  $this->getSpecificProperties(self::TYPE_ZAP);
         
         return $this;
     }
@@ -48,10 +45,7 @@ class PropertiesService
 
     public function setVivaRealProperties()
     {
-        $this->vivaRealProperties = $this->allProperties->filter(function ($item){
-                                        if(!isset($item['pricingInfos']['businessType']))          return false;
-                                        if($this->applyBusinessRules($item, self::TYPE_VIVA_REAL)) return $item;
-                                    });
+        $this->vivaRealProperties = $this->getSpecificProperties(self::TYPE_VIVA_REAL);
         
         return $this;
     }
@@ -59,6 +53,30 @@ class PropertiesService
     public function getVivaRealProperties()
     {
         return $this->vivaRealProperties->values();
+    }
+
+    private function getSpecificProperties($type)
+    {
+        return $this->allProperties->filter(function ($item) use ($type){
+            if(!$this->checkIfHaveLatAndLong($item))          return false;
+            if(!isset($item['pricingInfos']['businessType'])) return false;
+            if($this->applyBusinessRules($item, $type))       return $item;
+        });
+    }
+
+    private function checkIfHaveLatAndLong($item)
+    {
+        if( !isset($item["address"]['geoLocation']['location']['lon']) 
+                && 
+            !isset($item["address"]['geoLocation']['location']['lat'])
+        ) return false;
+
+        if( $item["address"]['geoLocation']['location']['lon'] == 0 
+                && 
+            $item["address"]['geoLocation']['location']['lat'] == 0
+        ) return false;
+        
+        return true;   
     }
 
     private function applyBusinessRules($item,$type) : bool
@@ -82,4 +100,5 @@ class PropertiesService
         if($type == self::TYPE_VIVA_REAL && $item['pricingInfos']['price'] <= self::MAX_VALUE_VIVA_REAL_SALE) return true;
         return false; 
     }
+
 }

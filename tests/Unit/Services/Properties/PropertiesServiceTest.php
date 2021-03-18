@@ -27,6 +27,11 @@ class PropertiesServiceTest extends TestCase
         $this->assertEquals($this->getZapSalesPropertiesNotInRule(), collect());
     }
 
+    public function test_it_should_test_if_zap_properties_have_no_address()
+    {
+        $this->assertEquals($this->getPropertiesWithoutAddress($this->service->getZapProperties()), collect());
+    }
+
     private function getZapRentPropertiesNotInRule()
     {
         return $this->service->getZapProperties()->filter(function ($item) {
@@ -49,6 +54,10 @@ class PropertiesServiceTest extends TestCase
         });
     }
 
+    /**
+     *  viva real
+     */
+
     public function test_it_should_test_viva_real_rent_properties_rules()
     {
         $this->assertEquals($this->getVivaRealRentPropertiesNotInRule(), collect());
@@ -57,6 +66,11 @@ class PropertiesServiceTest extends TestCase
     public function test_it_should_test_viva_real_sale_properties_rules()
     {
         $this->assertEquals($this->getVivaRealSalesPropertiesNotInRule(), collect());
+    }
+
+    public function test_it_should_test_if_viva_real_properties_have_no_address()
+    {
+        $this->assertEquals($this->getPropertiesWithoutAddress($this->service->getVivaRealProperties()), collect());
     }
 
     private function getVivaRealRentPropertiesNotInRule()
@@ -77,6 +91,18 @@ class PropertiesServiceTest extends TestCase
                 $item['pricingInfos']['businessType'] == PropertiesService::SALE 
                     && 
                 $item['pricingInfos']['price'] > PropertiesService::MAX_VALUE_VIVA_REAL_SALE
+            ) return $item;
+        });
+    }
+
+
+    private function getPropertiesWithoutAddress($zapOrVivaReal)
+    {
+        return $zapOrVivaReal->filter(function ($item) {
+            if( 
+                $item["address"]['geoLocation']['location']['lon'] == 0
+                    && 
+                $item["address"]['geoLocation']['location']['lat'] == 0
             ) return $item;
         });
     }
