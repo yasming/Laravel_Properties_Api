@@ -62,6 +62,6 @@ php artisan test
 
 ```
 The deploy is automatic when a push is done to master branch, but master branch is blocked, so is need to send me a pr,
-after it pass for the CI tests that is runned when a pr is created for master branch,
-I can accept the PR and after merge the deploy is done automatically !
+after it pass for the CI tests that is runned when a pr is created for master branch, I can accept the PR 
+and after merge the deploy is done automatically !
 ```
