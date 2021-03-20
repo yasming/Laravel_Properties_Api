@@ -24,7 +24,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('command:reset-cache')->daily()->timezone('America/Sao_Paulo')->at('1:00');
     }
 
     /**
