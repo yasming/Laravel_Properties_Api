@@ -44,5 +44,11 @@ class ResetCacheProperties extends Command
                                ->setZapProperties()
                                ->setVivaRealProperties();
         $this->info('Cache setted');
+        Mail::raw('Cache cleared', function($message)
+        {
+            $message->from(config('mail.from.address'), 'Cache cleared');
+            $message->subject('Cache Cleared');
+            $message->to(config('mail.from.address'));
+        });
     }
 }
