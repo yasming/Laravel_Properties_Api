@@ -19,7 +19,7 @@ class PropertiesServiceTest extends TestCase
 
     /**
      * zap
-     */
+    */
 
     public function test_it_should_test_zap_rent_properties_rules()
     {
@@ -44,15 +44,11 @@ class PropertiesServiceTest extends TestCase
     
     private function zapPropertiesRules($item)
     {
-        $longitude            =  $item['address']['geoLocation']['location']['lon'];
-        $latitude             =  $item['address']['geoLocation']['location']['lat'];
-        $propertiesBetweenBox =  numberBetween(PropertiesService::MIN_LONGITUDE,$longitude,PropertiesService::MAX_LONGITUDE)
-                                    &&
-                                 numberBetween(PropertiesService::MIN_LATITUDE,$latitude,PropertiesService::MAX_LATITUDE);
-        if($propertiesBetweenBox) {
-            return $item['pricingInfos']['price'] < PropertiesService::MIN_VALUE_ZAP_SALE * PropertiesService::MULTIPLY_ZAP_FACTOR;
+        $propertiesBetweenBoundingBox = $this->getBoundingbox($item);
+        if($propertiesBetweenBoundingBox) {
+            return $item['pricingInfos']['price'] < PropertiesService::MIN_VALUE_ZAP_SALE*PropertiesService::MULTIPLY_ZAP_FACTOR_BOUNDING_BOX;
         }
-        return $item['pricingInfos']['price'] < PropertiesService::MIN_VALUE_ZAP_SALE*PropertiesService::MULTIPLY_ZAP_FACTOR;
+        return $item['pricingInfos']['price'] < PropertiesService::MIN_VALUE_ZAP_SALE*PropertiesService::MULTIPLY_ZAP_FACTOR_BOUNDING_BOX;
     }
 
     public function test_it_should_test_if_zap_properties_have_no_address()
@@ -97,10 +93,24 @@ class PropertiesServiceTest extends TestCase
             if( 
                 $item['pricingInfos']['businessType'] == PropertiesService::RENTAL 
                     && 
-                $item['pricingInfos']['rentalTotalPrice'] > PropertiesService::MAX_VALUE_VIVA_REAL_RENTAL
+                $this->vivaRealPropertiesRules($item)
             ) return $item;
         });
     }
+
+    private function vivaRealPropertiesRules($item)
+    {
+        if(!isset($item['pricingInfos']['monthlyCondoFee']))           return true;
+        if(!is_numeric((int)$item['pricingInfos']['monthlyCondoFee'])) return true;
+        $propertiesBetweenBoundingBox = $this->getBoundingbox($item);
+        if ($propertiesBetweenBoundingBox && 
+            $item['pricingInfos']['rentalTotalPrice'] 
+                <=
+            PropertiesService::MAX_VALUE_VIVA_REAL_RENTAL*PropertiesService::MULTIPLY_VIVA_REAL_FACTOR_BOUNDING_BOX
+        ) return false;
+        if($propertiesBetweenBoundingBox == false && $item['pricingInfos']['rentalTotalPrice'] <= PropertiesService::MAX_VALUE_VIVA_REAL_RENTAL) return false;
+        return true;
+    } 
 
     private function getVivaRealSalesPropertiesNotInRule()
     {
@@ -123,5 +133,15 @@ class PropertiesServiceTest extends TestCase
                 $item["address"]['geoLocation']['location']['lat'] == 0
             ) return $item;
         });
+    }
+
+    private function getBoundingbox($item)
+    {
+        $longitude            =  $item['address']['geoLocation']['location']['lon'];
+        $latitude             =  $item['address']['geoLocation']['location']['lat'];
+        return  numberBetween(PropertiesService::MIN_LONGITUDE,$longitude,PropertiesService::MAX_LONGITUDE)
+                            &&
+                numberBetween(PropertiesService::MIN_LATITUDE,$latitude,PropertiesService::MAX_LATITUDE);
+
     }
 }

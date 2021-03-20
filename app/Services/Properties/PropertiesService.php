@@ -6,23 +6,25 @@ use Illuminate\Support\Facades\Http;
 
 class PropertiesService
 {
-    const RENTAL                         = 'RENTAL';   
-    const SALE                           = 'SALE';
-    const TYPE_ZAP                       = 1;
-    const TYPE_VIVA_REAL                 = 2;   
-    const MULTIPLY_ZAP_FACTOR            = 0.9;
+    const RENTAL                                 = 'RENTAL';   
+    const SALE                                   = 'SALE';
+    const TYPE_ZAP                               = 1;
+    const TYPE_VIVA_REAL                         = 2;   
+    const MULTIPLY_ZAP_FACTOR_BOUNDING_BOX       = 0.9;
+    const MULTIPLY_VIVA_REAL_FACTOR_BOUNDING_BOX = 1.5;
+    const MULTIPLY_RENT_FACTOR_VIVA_REAL         = 0.3;
 
-    const MIN_LONGITUDE                  = -46.693419;
-    const MAX_LONGITUDE                  = -46.641146;
-    const MIN_LATITUDE                   = -23.568704;
-    const MAX_LATITUDE                   = -23.546686;
-
-    const MIN_VALUE_ZAP_RENTAL           = 3500;
-    const MIN_VALUE_ZAP_SALE             = 600000;
-    const MIN_VALUE_ZAP_SALE_USABLE_AREA = 3500;
-
-    const MAX_VALUE_VIVA_REAL_RENTAL     = 4000;
-    const MAX_VALUE_VIVA_REAL_SALE       = 700000;
+    const MIN_LONGITUDE                          = -46.693419;
+    const MAX_LONGITUDE                          = -46.641146;
+    const MIN_LATITUDE                           = -23.568704;
+    const MAX_LATITUDE                           = -23.546686;
+        
+    const MIN_VALUE_ZAP_RENTAL                   = 3500;
+    const MIN_VALUE_ZAP_SALE                     = 600000;
+    const MIN_VALUE_ZAP_SALE_USABLE_AREA         = 3500;
+        
+    const MAX_VALUE_VIVA_REAL_RENTAL             = 4000;
+    const MAX_VALUE_VIVA_REAL_SALE               = 700000;
 
     private $urlToGetProperties;
     private $allProperties;
@@ -96,33 +98,51 @@ class PropertiesService
 
     private function applyRentalRule($item,$type) : bool
     {
-        if(!isset($item['pricingInfos']['rentalTotalPrice']))                                                              return false;
-        if($type == self::TYPE_ZAP       && $item['pricingInfos']['rentalTotalPrice'] >= self::MIN_VALUE_ZAP_RENTAL)       return true;
-        if($type == self::TYPE_VIVA_REAL && $item['pricingInfos']['rentalTotalPrice'] <= self::MAX_VALUE_VIVA_REAL_RENTAL) return true;
+        if(!isset($item['pricingInfos']['rentalTotalPrice']))                                                  return false;
+        if($type == self::TYPE_ZAP && $item['pricingInfos']['rentalTotalPrice'] >= self::MIN_VALUE_ZAP_RENTAL) return true;
+        if($type == self::TYPE_VIVA_REAL)                                                                      return $this->applyRentalRuleVivaReal($item);
         return false; 
+    }
+
+    private function applyRentalRuleVivaReal($item) : bool
+    {
+        if(!isset($item['pricingInfos']['monthlyCondoFee']))           return false;
+        if(!is_numeric((int)$item['pricingInfos']['monthlyCondoFee'])) return false;
+        if($item['pricingInfos']['monthlyCondoFee'] >= $item['pricingInfos']['rentalTotalPrice']*self::MULTIPLY_RENT_FACTOR_VIVA_REAL) 
+            return false;
+
+        $boundingBox = $this->getBoundingbox($item);
+        if ($boundingBox && 
+            $item['pricingInfos']['rentalTotalPrice'] 
+                <=
+            self::MAX_VALUE_VIVA_REAL_RENTAL*self::MULTIPLY_VIVA_REAL_FACTOR_BOUNDING_BOX
+        ) return true;
+
+        if($boundingBox == false && $item['pricingInfos']['rentalTotalPrice'] <= self::MAX_VALUE_VIVA_REAL_RENTAL) return true;
+        return false;
     }
 
     private function applySalesRule($item, $type) : bool
     {
         if(!isset($item['pricingInfos']['price']))                                                            return false;
-        if($type == self::TYPE_ZAP) return $this->applySalesRuleZap($item);
+        if($type == self::TYPE_ZAP)                                                                           return $this->applySalesRuleZap($item);
         if($type == self::TYPE_VIVA_REAL && $item['pricingInfos']['price'] <= self::MAX_VALUE_VIVA_REAL_SALE) return true;
         return false; 
     }
 
     private function applySalesRuleZap($item)
     {
-        if(!isset($item['usableAreas']))                                                                             return false;
-        if($item['usableAreas'] == 0)                                                                                return false;
-        if($item['usableAreas'] <= 3500 )                                                                            return false;
-        $minValueZapSale = $this->getMinValueZapSale($item);
-
-        if($minValueZapSale && $item['pricingInfos']['price'] >= self::MIN_VALUE_ZAP_SALE*self::MULTIPLY_ZAP_FACTOR) return true;
-        if($minValueZapSale == false && $item['pricingInfos']['price'] >= self::MIN_VALUE_ZAP_SALE)                  return true;
+        if(!isset($item['usableAreas']))                                                            return false;
+        if($item['usableAreas'] == 0)                                                               return false;
+        if($item['usableAreas'] <= 3500 )                                                           return false;
+        $boundingBox = $this->getBoundingbox($item);
+        if($boundingBox && $item['pricingInfos']['price'] >= self::MIN_VALUE_ZAP_SALE*self::MULTIPLY_ZAP_FACTOR_BOUNDING_BOX) 
+            return true;
+        if($boundingBox == false && $item['pricingInfos']['price'] >= self::MIN_VALUE_ZAP_SALE) return true;
         return false;
     }
 
-    private function getMinValueZapSale($item)
+    private function getBoundingbox($item)
     {
         $longitude = $item['address']['geoLocation']['location']['lon'];
         $latitude  = $item['address']['geoLocation']['location']['lat'];
