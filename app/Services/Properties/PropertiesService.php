@@ -2,6 +2,7 @@
 
 namespace App\Services\Properties;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class PropertiesService
@@ -38,14 +39,21 @@ class PropertiesService
 
     public function setAllProperties()
     {
-        $this->allProperties = Http::get($this->urlToGetProperties)->collect();
+        if(!Cache::has('allProperties')) {
+            $this->allProperties = Http::get($this->urlToGetProperties)->collect();
+            $this->putItensOnCache('allProperties',$this->allProperties);
+        }
+        if(Cache::has('allProperties')) $this->allProperties = Cache::get('allProperties');
         return $this;
     }
 
     public function setZapProperties()
     {
-        $this->zapProperties =  $this->getSpecificProperties(self::TYPE_ZAP);
-        
+        if(!Cache::has('zapProperties')) {
+            $this->zapProperties =  $this->getSpecificProperties(self::TYPE_ZAP);
+            $this->putItensOnCache('zapProperties',$this->zapProperties);
+        }
+        if(Cache::has('zapProperties')) $this->zapProperties = Cache::get('zapProperties');
         return $this;
     }
 
@@ -56,8 +64,11 @@ class PropertiesService
 
     public function setVivaRealProperties()
     {
-        $this->vivaRealProperties = $this->getSpecificProperties(self::TYPE_VIVA_REAL);
-        
+        if(!Cache::has('vivaRealProperties')) {
+            $this->vivaRealProperties = $this->getSpecificProperties(self::TYPE_VIVA_REAL);
+            $this->putItensOnCache('vivaRealProperties',$this->vivaRealProperties);
+        }
+        if(Cache::has('vivaRealProperties')) $this->vivaRealProperties = Cache::get('vivaRealProperties');
         return $this;
     }
 
@@ -149,5 +160,10 @@ class PropertiesService
         return  numberBetween(self::MIN_LONGITUDE,$longitude,self::MAX_LONGITUDE)
                     &&
                 numberBetween(self::MIN_LATITUDE,$latitude,self::MAX_LATITUDE);
+    }
+
+    private function putItensOnCache($key,$value)
+    {
+        Cache::put($key,$value);
     }
 }
