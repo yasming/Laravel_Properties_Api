@@ -8,17 +8,23 @@ This project is an api to do filter all properties from http://grupozap-code-cha
 Docker
 ```
 
-### API Collection
+### API Postman Collection
 
+```
 https://www.getpostman.com/collections/2c44d41e1a6bf7290440
+```
 
 ### API Swagger Documentation
 
+```
 https://app.swaggerhub.com/apis-docs/yasminguimaraes/PROPERTIES_API/1.0.0
+```
 
 ### Application public link
 
+```
 https://properties-api-list.herokuapp.com/
+```
 
 ### How to run project's locally
 
