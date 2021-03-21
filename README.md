@@ -28,34 +28,20 @@ https://app.swaggerhub.com/apis-docs/yasminguimaraes/PROPERTIES_API/1.0.0
 
 https://properties-api-list.herokuapp.com/
 
-### Getting Started
-
-- After you clone the project: 
+### How to run project's locally
 
 ```
-composer install
+docker-compose up
 ```
 
 ```
-cp .env.example .env
-```
-
-```
-php artisan key:generate
-```
-
-```
-php artisan jwt:generate
-```
-
-```
-php artisan migrate --seed
+after this the project will be accessible at localhost:80
 ```
 
 ### How to run project's tests
 
 ```
-php artisan test
+on root directory run: vendor/bin/phpunit
 ```
 
 ### How to deploy new features
