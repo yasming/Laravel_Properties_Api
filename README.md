@@ -5,15 +5,7 @@ This project is an api to do filter all properties from http://grupozap-code-cha
 ## Prerequisites
 
 ```
-PHP >= 8.0
-```
-
-```
-PHP Unit >=9.3.3
-```
-
-```
-Laravel >= 8.12
+Docker
 ```
 
 ### API Collection
