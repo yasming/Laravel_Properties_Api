@@ -29,7 +29,7 @@ https://properties-api-list.herokuapp.com/
 ### How to run project's locally
 
 ```
-docker-compose up
+docker-compose up --build
 ```
 
 ```
