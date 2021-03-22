@@ -15,8 +15,7 @@ class ZapControllerTest extends TestCase
         parent::setUp();
         ini_set('memory_limit', '2G');
         $this->service = (new PropertiesService)->setAllProperties()
-                                                ->setZapProperties()
-                                                ->setVivaRealProperties();
+                                                ->setZapProperties();
     }
 
     public function test_it_should_get_zap_properties()

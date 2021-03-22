@@ -24,7 +24,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('command:reset-cache')->daily()->timezone('America/Sao_Paulo')->at('1:00');
+        $schedule->command('command:reset-cache')->daily()->timezone('America/Sao_Paulo')->at('1:02');
     }
 
     /**
