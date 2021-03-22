@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   dependencies_installation:
-    image: composer
+    build: .
     container_name: dependencies_installation_container
     volumes:
       - ./:/app
