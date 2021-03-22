@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+  dependencies_installation:
+    image: composer
+    container_name: dependencies_installation_container
+    volumes:
+      - ./:/app
+    command: bash /app/docker-dependencies.sh
+
+  nginx:
+    image: ambientum/php:8.0-nginx
+    container_name: nginx_container
+    volumes: 
+      - ./:/var/www/app
+    ports:
+      - 80:8080
+    depends_on: 
+      - dependencies_installation
