@@ -5,57 +5,41 @@ This project is an api to do filter all properties from http://grupozap-code-cha
 ## Prerequisites
 
 ```
-PHP >= 8.0
+Docker
 ```
 
-```
-PHP Unit >=9.3.3
-```
+### API Postman Collection
 
 ```
-Laravel >= 8.12
-```
-
-### API Collection
-
 https://www.getpostman.com/collections/2c44d41e1a6bf7290440
+```
 
 ### API Swagger Documentation
 
+```
 https://app.swaggerhub.com/apis-docs/yasminguimaraes/PROPERTIES_API/1.0.0
+```
 
-### Application public link
+### Application Public Link
 
+```
 https://properties-api-list.herokuapp.com/
-
-### Getting Started
-
-- After you clone the project: 
-
-```
-composer install
 ```
 
+### How to run project's locally
+
 ```
-cp .env.example .env
+docker-compose up
 ```
 
 ```
-php artisan key:generate
-```
-
-```
-php artisan jwt:generate
-```
-
-```
-php artisan migrate --seed
+after this the project will be accessible at localhost:80
 ```
 
 ### How to run project's tests
 
 ```
-php artisan test
+on root directory run: vendor/bin/phpunit
 ```
 
 ### How to deploy new features
