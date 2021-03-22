@@ -20,7 +20,7 @@ https://www.getpostman.com/collections/2c44d41e1a6bf7290440
 https://app.swaggerhub.com/apis-docs/yasminguimaraes/PROPERTIES_API/1.0.0
 ```
 
-### Application public link
+### Application Public Link
 
 ```
 https://properties-api-list.herokuapp.com/
